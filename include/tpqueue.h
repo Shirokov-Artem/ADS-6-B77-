@@ -2,9 +2,6 @@
 #ifndef INCLUDE_TPQUEUE_H_
 #define INCLUDE_TPQUEUE_H_
 
-#include <cstring>
-#include <stdexcept>
-
 struct SYM {
   char ch;
   int prior;
@@ -13,55 +10,60 @@ struct SYM {
 template<typename T, int size>
 class TPQueue {
  private:
-    T* arr;
-    int begin, end, count;
-    int next(int current) {
-        return (current + 1) % size;
-    }
-
-    int prev(int current) {
-        return (current - 1 + size) % size;
-    }
+    T arr[size];
+    int begin, end;
+    int count;
 
  public:
-    TPQueue(): begin(0), end(0), count(0), arr(new T[size]) {}
-
-    ~TPQueue() {
-        delete[] arr;
-    }
+    TPQueue() : begin(0), end(0), count(0) {}
 
     void push(const T& item) {
-        if (count == size) {
-            throw std::out_of_range("Queue is full");
-        }
+        if (count < size) {
+            if (count == 0) {
+                arr[end] = item;
+                end = (end + 1) % size;
+                count++;
+            } else {
+                int i = end - 1;
+                if (i < 0) {
+                    i = size - 1;
+                }
 
-        if (count == 0) {
-            arr[begin] = item;
-            count++;
-            return;
-        }
+                while (i != begin - 1) {
+                    if (item.prior > arr[i].prior) {
+                        arr[(i + 1) % size] = arr[i];
+                        i--;
 
-        int i = end;
-        while (i != begin && item.prior > arr[prev(i)].prior) {
-            arr[i] = arr[prev(i)];
-            i = prev(i);
-        }
+                        if (i < 0) {
+                            i = size - 1;
+                        }
+                    } else {
+                        break;
+                    }
+                }
 
-        arr[i] = item;
-        end = next(end);
-        count++;
+                arr[(i + 1) % size] = item;
+                end = (end + 1) % size;
+                count++;
+            }
+        }
     }
 
     T pop() {
-        if (count == 0) {
-            throw std::out_of_range("Queue is empty");
+        if (count > 0) {
+            T item = arr[begin];
+            begin = (begin + 1) % size;
+            count--;
+            return item;
         }
+    }
 
-        T item = arr[begin];
-        begin = next(begin);
-        count--;
+    bool isEmpty() const {
+        return count == 0;
+    }
 
-        return item;
+    bool isFull() const {
+        return count == size;
     }
 };
 
