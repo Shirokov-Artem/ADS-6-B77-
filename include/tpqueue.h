@@ -11,46 +11,49 @@ class TPQueue {
     int begin, // начало очереди
         end; // конец очереди
     int count; // счетчик элементов
-    
+
  public:
-    TPQueue(): begin(0), end(0), count(0) { 
-        arr = new T[size]; 
+    TPQueue(): begin(0), end(0), count(0) {
+        arr = new T[size];
     }
-    
+
     ~TPQueue() {
-        delete[] arr; 
+        delete[] arr;
     }
-    
+
     bool isEmpty() const {
-        return count == 0; 
+        return count == 0;
     }
-    
+
     bool isFull() const {
-        return count == size; 
+        return count == size;
     }
-    
+
     void push(const T& item) {
         if (count < size) {
             int cur = end;
-            while (cur != begin && item.prior > arr[(cur - 1 + size) % size].prior) {
+            while (cur != begin && item.prior > arr[(cur - 1 + size) %
+            size].prior) {
                 arr[cur] = arr[(cur - 1 + size) % size];
                 cur = (cur - 1 + size) % size;
             }
             arr[cur] = item;
             end = (end + 1) % size;
             count++;
-        } else
+        } else {
             throw "Queue is full!";
+          }
     }
-    
+
     T pop() {
         if (count > 0) {
             T item = arr[begin];
             begin = (begin + 1) % size;
             count--;
             return item;
-        } else
+        } else {
             throw "Queue is empty!";
+          }
     }
 };
 
