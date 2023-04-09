@@ -7,79 +7,50 @@
 template<typename T, int size>
 class TPQueue {
  private:
-    T arr[size];
-    int begin,
-        end;
-    int count;
-
-    int next(int current) {
-        ++current;
-        if (current == size)
-            current = 0;
-        return current;
-    }
-
-    int prev(int current) {
-        --current;
-        if (current == -1)
-            current = size - 1;
-        return current;
-    }
-
-    void swap(T& a, T& b) {
-        T temp = a;
-        a = b;
-        b = temp;
-    }
-
+    T* arr; // массив с данными
+    int begin, // начало очереди
+        end; // конец очереди
+    int count; // счетчик элементов
+    
  public:
-    TPQueue() :
-        begin(0), end(0), count(0) {
+    TPQueue(): begin(0), end(0), count(0) { 
+        arr = new T[size]; 
     }
-
-    void push(const T& item) {
-        if (count == size)
-            throw std::string("Queue overflow!");
-        if (count == 0) {
-            arr[end] = item;
-            count++;
-            return;
-        }
-        int cur = prev(end);
-        while (arr[cur].prior >= item.prior) {
-            arr[next(cur)] = arr[cur];
-            if (cur == begin) {
-                begin = next(begin);
-                break;
-            }
-            cur = prev(cur);
-        }
-        arr[next(cur)] = item;
-        end = next(end);
-        count++;
+    
+    ~TPQueue() {
+        delete[] arr; 
     }
-
-    T pop() {
-        if (count == 0)
-            throw std::string("Queue is empty!");
-        T item = arr[begin];
-        count--;
-        begin = next(begin);
-        return item;
-    }
-
-    T get() const {
-        if (count == 0)
-            throw std::string("Queue is empty!");
-        return arr[begin];
-    }
-
+    
     bool isEmpty() const {
-        return count == 0;
+        return count == 0; 
     }
-
+    
     bool isFull() const {
-        return count == size;
+        return count == size; 
+    }
+    
+    void push(const T& item) {
+        if (count < size) {
+            int cur = end;
+            while (cur != begin && item.prior > arr[(cur - 1 + size) % size].prior) {
+                arr[cur] = arr[(cur - 1 + size) % size];
+                cur = (cur - 1 + size) % size;
+            }
+            arr[cur] = item;
+            end = (end + 1) % size;
+            count++;
+        } else
+            throw "Queue is full!";
+    }
+    
+    T pop() {
+        if (count > 0) {
+            T item = arr[begin];
+            begin = (begin + 1) % size;
+            count--;
+            return item;
+        } else
+            throw "Queue is empty!";
     }
 };
 
