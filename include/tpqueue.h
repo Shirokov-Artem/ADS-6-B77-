@@ -3,60 +3,75 @@
 #define INCLUDE_TPQUEUE_H_
 
 #include <string>
-#include <stdexcept>
-
-struct SYM {
-  char ch;
-  int prior;
-};
 
 template<typename T, int size>
 class TPQueue {
  private:
-    T* arr;
+    T arr[size];
     int begin,
-        end,
-        count;
+        end;
+    int count;
+
+    int next(int current) {
+        ++current;
+        if (current == size)
+            current = 0;
+        return current;
+    }
+
+    int prev(int current) {
+        --current;
+        if (current == -1)
+            current = size - 1;
+        return current;
+    }
+
+    void swap(T& a, T& b) {
+        T temp = a;
+        a = b;
+        b = temp;
+    }
 
  public:
     TPQueue() :
         begin(0), end(0), count(0) {
-        arr = new T[size + 1];
-    }
-
-    ~TPQueue() {
-        delete[] arr;
     }
 
     void push(const T& item) {
-        if (count >= size) {
-            throw std::logic_error("Queue is full");
-        } else if (count == 0) {
+        if (count == size)
+            throw std::string("Queue overflow!");
+        if (count == 0) {
             arr[end] = item;
-        } else {
-            int i = end - 1;
-            if (i < 0) i = size - 1;
-            while (i >= begin && item.prior > arr[i].prior) {
-                arr[i + 1] = arr[i];
-                i--;
-            }
-            arr[i + 1] = item;
-            end++;
-            if (end > size)
-                end -= size + 1;
+            count++;
+            return;
         }
+        int cur = prev(end);
+        while (arr[cur].prior >= item.prior) {
+            arr[next(cur)] = arr[cur];
+            if (cur == begin) {
+                begin = next(begin);
+                break;
+            }
+            cur = prev(cur);
+        }
+        arr[next(cur)] = item;
+        end = next(end);
         count++;
     }
 
     T pop() {
-        if (count == 0) {
-            throw std::logic_error("Queue is empty");
-        }
-        T item = arr[begin++];
+        if (count == 0)
+            throw std::string("Queue is empty!");
+        T item = arr[begin];
         count--;
-        if (begin > size)
-            begin -= size + 1;
+        begin = next(begin);
         return item;
+    }
+
+    T get() const {
+        if (count == 0)
+            throw std::string("Queue is empty!");
+        return arr[begin];
     }
 
     bool isEmpty() const {
@@ -68,6 +83,10 @@ class TPQueue {
     }
 };
 
+struct SYM {
+  char ch;
+  int prior;
+};
 
 
 #endif  // INCLUDE_TPQUEUE_H_
